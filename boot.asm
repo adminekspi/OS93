@@ -5,7 +5,7 @@ jmp boot_start
 nop
 
 ;-----------------------------------------
-; FAT16 BPB ‚Äì For 128 MB image (compatible with mkfs.vfat)
+; FAT16 BPB ? For 128 MB image (compatible with mkfs.vfat)
 OEM_ID             db "MSDOS5.0"
 BytesPerSector     dw 512
 SectorsPerCluster  db 4                ; 4 sectors = 2048 bytes
@@ -34,7 +34,7 @@ FirstDataSector    dw 0       ; First data sector after the root directory
 RootDirStart       dw 0       ; Starting LBA of the root directory
 
 ; Kernel file name to be loaded (8+3, without dot, padded with spaces)
-KernelName         db "kernel  bin"   ; total 11 bytes
+KernelName         db "KERNEL  BIN"   ; total 11 bytes
 
 ; Messages
 boot_msg           db "Booting OS93...", 10, 13, 0
@@ -51,7 +51,7 @@ boot_start:
     mov sp, 0x7A00
 
     ; Print boot message
-    mov si, boot_msg
+    mov si, boot_msg - 0x7C00
     call print_string
 
     ; (Pre-calculated) Number of root directory sectors: (224*32)/512 = 14 sectors
@@ -72,6 +72,8 @@ boot_start:
 
     ; Load the root directory (14 sectors) to address 0x9000
     mov si, [RootDirStart]    ; Starting LBA (513)
+    mov ax, 0x0000
+    mov es, ax
     mov di, 0x9000            ; Target memory address
     mov bx, 14                ; 14 sectors
 .load_root_loop:
@@ -88,23 +90,24 @@ boot_start:
     dec bx
     jnz .load_root_loop
 
-    ; Search for "kernel  bin" file in the root directory (224 entries)
-    mov si, 0x9000          ; Root directory start
+    ; Search for "KERNEL  BIN" file in the root directory (224 entries)
+    mov si, 0          ; Root directory data loaded in ES; ES:SI = offset 0 (i.e., 0x9000 physical address)
     mov cx, 224
 .search_loop:
-    cmp byte [si], 0        ; 0 means empty (end of directory)
+    cmp byte es:[si], 0    ; Check through ES: if 0, it's empty
     je kernel_not_found
     push cx
     push si
-    mov di, KernelName
-    mov cx, 11
-    call compare_string     ; Compare DS:SI with DS:DI; if equal, AX = 0
+    mov di, KernelName     ; DS:KernelName
+    mov cx, 11             ; Compare 11 bytes
+    call compare_string2   ; Compare ES:SI with DS:DI
     pop si
     pop cx
     cmp ax, 0
     je found_kernel
-    add si, 32              ; Next directory entry (each entry is 32 bytes)
+    add si, 32             ; Next directory entry (each entry is 32 bytes)
     loop .search_loop
+
 kernel_not_found:
     mov si, notfound_msg - 0x7C00
     call print_string
@@ -198,7 +201,7 @@ LBA2CHS:
 ;-----------------------------------------
 ; compare_string:
 ; Compares strings at DS:SI and DS:DI for CX bytes.
-; If equal, AX = 0; otherwise, AX ‚â† 0.
+; If equal, AX = 0; otherwise, AX ? 0.
 compare_string:
     push cx
 .compare_loop:
@@ -213,6 +216,42 @@ compare_string:
     mov ax, 1
     pop cx
     ret
+
+; compare_string2 (case-insensitive):
+; ES:SI (root dizin girdisi) ile DS:DI (KernelName) aras?nda, CX baytl?k kar??la?t?rma yapar.
+; Kar??la?t?rma bÅyÅk/kÅáÅk harf duyars?zd?r.
+; E?er e?itse AX = 0, e?it de?ilse AX ? 0.
+compare_string2:
+    push cx
+.compare2_loop:
+    mov al, es:[si]    ; ES'den oku (dizin girdisindeki karakter)
+    mov bl, ds:[di]    ; DS'den oku (KernelName'deki karakter)
+    ; Karakterleri bÅyÅk harfe dînÅ?tÅr (a-z aras? iáin)
+    cmp al, 'a'
+    jb .skip_convert_al
+    cmp al, 'z'
+    ja .skip_convert_al
+    sub al, 32         ; KÅáÅk harfi bÅyÅk harfe áevir
+.skip_convert_al:
+    cmp bl, 'a'
+    jb .skip_convert_bl
+    cmp bl, 'z'
+    ja .skip_convert_bl
+    sub bl, 32
+.skip_convert_bl:
+    cmp al, bl
+    jne .not_equal2
+    inc si
+    inc di
+    loop .compare2_loop
+    xor ax, ax         ; E?itse AX = 0
+    pop cx
+    ret
+.not_equal2:
+    mov ax, 1
+    pop cx
+    ret
+
 
 ;-----------------------------------------
 ; print_string:
