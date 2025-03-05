@@ -13,6 +13,6 @@ After installing these packages and cloning this repository, you can build and r
     make run
 
 ## Copyright and License
-Copyright (c) 2024-2025 Erdem Ersoy (adminekspi). Licensed with MIT license.
+Copyright (c) 2025 Erdem Ersoy (adminekspi). Licensed with MIT license.
 
 See COPYING for full license text.
