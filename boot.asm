@@ -5,7 +5,7 @@ jmp boot_start
 nop
 
 ;-----------------------------------------
-; FAT16 BPB ? For 128 MB image (compatible with mkfs.vfat)
+; FAT16 BPB, for 128 MB image (compatible with mkfs.vfat)
 OEM_ID             db "MSDOS5.0"
 BytesPerSector     dw 512
 SectorsPerCluster  db 4                ; 4 sectors = 2048 bytes
@@ -201,7 +201,7 @@ LBA2CHS:
 ;-----------------------------------------
 ; compare_string:
 ; Compares strings at DS:SI and DS:DI for CX bytes.
-; If equal, AX = 0; otherwise, AX ? 0.
+; If equal, AX = 0; otherwise, AX != 0.
 compare_string:
     push cx
 .compare_loop:
@@ -218,20 +218,20 @@ compare_string:
     ret
 
 ; compare_string2 (case-insensitive):
-; ES:SI (root dizin girdisi) ile DS:DI (KernelName) aras?nda, CX baytl?k kar??la?t?rma yapar.
-; Kar??la?t?rma bÅyÅk/kÅáÅk harf duyars?zd?r.
-; E?er e?itse AX = 0, e?it de?ilse AX ? 0.
+; ES:SI (root directory entry) with DS:DI (KernelName) comparison for CX bytes.
+; Case-insensitive comparison.
+; If equal, AX = 0; if not equal, AX ? 0.
 compare_string2:
     push cx
 .compare2_loop:
-    mov al, es:[si]    ; ES'den oku (dizin girdisindeki karakter)
-    mov bl, ds:[di]    ; DS'den oku (KernelName'deki karakter)
-    ; Karakterleri bÅyÅk harfe dînÅ?tÅr (a-z aras? iáin)
+    mov al, es:[si]    ; Read from ES (directory entry character)
+    mov bl, ds:[di]    ; Read from DS (KernelName character)
+    ; Convert characters to uppercase (if between 'a' and 'z')
     cmp al, 'a'
     jb .skip_convert_al
     cmp al, 'z'
     ja .skip_convert_al
-    sub al, 32         ; KÅáÅk harfi bÅyÅk harfe áevir
+    sub al, 32         ; Convert to uppercase
 .skip_convert_al:
     cmp bl, 'a'
     jb .skip_convert_bl
@@ -244,14 +244,13 @@ compare_string2:
     inc si
     inc di
     loop .compare2_loop
-    xor ax, ax         ; E?itse AX = 0
+    xor ax, ax         ; If equal, AX = 0
     pop cx
     ret
 .not_equal2:
     mov ax, 1
     pop cx
     ret
-
 
 ;-----------------------------------------
 ; print_string:
