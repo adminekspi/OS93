@@ -12,20 +12,30 @@ OBJECTS = $(SOURCES:.c=.o)
 
 OUTPUT_BOOT = boot.bin
 OUTPUT_KERNEL = kernel.bin
-OUTPUT_OS93 = os93.bin
+OUTPUT_IMG = os93.img
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 all: $(OBJECTS)
-	nasm -f bin boot.asm -o boot.bin
+	nasm -f bin boot.asm -o $(OUTPUT_BOOT)
 	nasm -f elf kernel.asm -o $(OBJECT_KERNEL)
 	$(LD) $(LDFLAGS) $(OBJECT_KERNEL) $(OBJECTS)
-	dd if=/dev/zero of=$(OUTPUT_OS93) bs=512 count=2880
-	cat $(OUTPUT_BOOT) $(OUTPUT_KERNEL) > $(OUTPUT_OS93)
+
+	# Create and format a 128 MB FAT16 image:
+	# Using the -C option to create the file with 131072 blocks (131072 * 1024 = 134217728 bytes).
+	# -F 16 : Select FAT16 format
+	# -s 4 : 4 sectors per cluster (cluster size 2048 bytes)
+	# -r 224 : 224 entries for the root directory
+	# -n OS93 : Set the volume label to OS93
+	# -I : Disable safety checks (for formatting on a file)
+	mkfs.vfat -F 16 -s 4 -r 224 -n OS93 -I -C $(OUTPUT_IMG) 131072
+
+	dd if=$(OUTPUT_BOOT) of=$(OUTPUT_IMG) bs=1 count=448 seek=62 conv=notrunc
+	mcopy -i $(OUTPUT_IMG) $(OUTPUT_KERNEL) ::kernel.bin
 
 run: all
-	qemu-system-i386 -hda os93.bin -vga std
+	qemu-system-i386 -drive file=$(OUTPUT_IMG),format=raw -vga std
 
 clean:
-	rm -f *.bin *.o
+	rm -f *.bin *.o $(OUTPUT_IMG)

@@ -6,7 +6,7 @@ start:
     mov ds, ax
     mov es, ax
     mov ss, ax
-    mov sp, 0x7E00
+    mov sp, 0x7A00
 
     ; Print the message
     mov si, switch_msg
