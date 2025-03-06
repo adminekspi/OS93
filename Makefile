@@ -23,13 +23,12 @@ all: $(OBJECTS)
 	dd if=/dev/zero of=$(OUTPUT_IMG) bs=1M count=128
 	mkfs.vfat -F 16 $(OUTPUT_IMG)
 
-	mkdir -p mnt
-	sudo mount -o loop $(OUTPUT_IMG) mnt
-	sudo cp $(OUTPUT_KERNEL) syslinux.cfg mnt/
-	sudo cp /usr/lib/syslinux/modules/bios/mboot.c32 mnt/
-	sudo cp /usr/lib/syslinux/modules/bios/libcom32.c32 mnt/
-	sudo cp /usr/lib/syslinux/modules/bios/libutil.c32 mnt/
-	sudo umount mnt
+	mcopy -i $(OUTPUT_IMG) $(OUTPUT_KERNEL) ::/
+	mcopy -i $(OUTPUT_IMG) syslinux.cfg ::/
+	mcopy -i $(OUTPUT_IMG) /usr/lib/syslinux/modules/bios/ldlinux.c32 ::/
+	mcopy -i $(OUTPUT_IMG) /usr/lib/syslinux/modules/bios/libcom32.c32 ::/
+	mcopy -i $(OUTPUT_IMG) /usr/lib/syslinux/modules/bios/libutil.c32 ::/
+	mcopy -i $(OUTPUT_IMG) /usr/lib/syslinux/modules/bios/mboot.c32 ::/
 
 	syslinux --install $(OUTPUT_IMG)
 
@@ -37,4 +36,4 @@ run: all
 	qemu-system-i386 -m 128M -drive file=$(OUTPUT_IMG),format=raw -vga std
 
 clean:
-	sudo rm -rf *.bin *.o *.img mnt/
+	rm -rf *.bin *.o *.img mnt/
