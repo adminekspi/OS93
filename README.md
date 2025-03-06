@@ -3,6 +3,8 @@ My second attempt OS from scratch.
 
 Written with the help of ChatGPT and GitHub Copilot.
 
+![OS93 0.0.1 on QEMU](media/OS93_0_0_1.png)
+
 # Building and Running
 In Pardus 23 (Debian-based), those packages should be installed:
 
