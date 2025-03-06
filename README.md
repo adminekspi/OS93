@@ -6,7 +6,7 @@ Written with the help of ChatGPT and GitHub Copilot.
 # Building and Running
 In Pardus 23 (Debian-based), those packages should be installed:
 
-    build-essential gcc-i686-linux-gnu nasm qemu-system-x86
+    build-essential gcc-i686-linux-gnu nasm qemu-system-x86 syslinux
 
 After installing these packages and cloning this repository, you can build and run with that command:
 
