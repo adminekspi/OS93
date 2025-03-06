@@ -28,7 +28,7 @@ all: $(OBJECTS)
 	mcopy -v -i $(OUTPUT_IMG) $(OUTPUT_KERNEL) "::KERNEL.BIN"
 
 run: all
-	qemu-system-i386 -drive file=$(OUTPUT_IMG),format=raw -vga std
+	qemu-system-i386 -m 128M -drive file=$(OUTPUT_IMG),format=raw -vga std
 
 clean:
 	rm -f *.bin *.o $(OUTPUT_IMG)
