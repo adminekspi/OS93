@@ -37,4 +37,4 @@ run: all
 	qemu-system-i386 -m 128M -drive file=$(OUTPUT_IMG),format=raw -vga std
 
 clean:
-	sudo rm -f *.bin *.o *.img
+	sudo rm -rf *.bin *.o *.img mnt/
