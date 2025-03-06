@@ -21,7 +21,7 @@ all: $(OBJECTS)
 	$(LD) $(LDFLAGS) $(OBJECT_KERNEL) $(OBJECTS)
 
 	dd if=/dev/zero of=$(OUTPUT_IMG) bs=1M count=128
-	mkfs.vfat -F 16 $(OUTPUT_IMG)
+	mformat -C -h 15 -t 1024 -s 17 -v OS93 -i $(OUTPUT_IMG) ::/
 
 	mcopy -i $(OUTPUT_IMG) $(OUTPUT_KERNEL) ::/
 	mcopy -i $(OUTPUT_IMG) syslinux.cfg ::/
