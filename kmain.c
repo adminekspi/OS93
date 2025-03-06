@@ -1,12 +1,18 @@
 #include "kmain.h"
 #include "ports.h"
+#include "vga.h"
 #include "video.h"
 
 void kmain(void)
 {
-    clear_screen();
-    print_string(KMAIN_HELLO_MSG, 5, 5, 0x07);
-    print_char('X', 10, 10, 0x04);
+    write_regs(mode_12h_regs);
+    clear_screen_vga();
+    putpixel(5, 5, 4);
+    putpixel(6, 5, 4);
+    putpixel(7, 5, 4);
+    putpixel(8, 5, 4);
+    putpixel(9, 5, 4);
+    putpixel(10, 5, 4);
 
     while(1);
 }
