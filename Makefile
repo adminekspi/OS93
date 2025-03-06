@@ -24,7 +24,7 @@ all: $(OBJECTS)
 
 	mkfs.fat -F 16 -R 4 -s 4 -S 512 -r 512 -n OS93 -I -v -C $(OUTPUT_IMG) 131072
 
-	dd if=$(OUTPUT_BOOT) of=$(OUTPUT_IMG) bs=1 count=512 conv=notrunc
+	dd if=$(OUTPUT_BOOT) of=$(OUTPUT_IMG) bs=512 count=1 conv=notrunc
 	mcopy -v -i $(OUTPUT_IMG) $(OUTPUT_KERNEL) "::KERNEL.BIN"
 
 run: all
