@@ -21,16 +21,25 @@ all: $(OBJECTS)
 	$(LD) $(LDFLAGS) $(OBJECT_KERNEL) $(OBJECTS)
 
 	dd if=/dev/zero of=$(OUTPUT_IMG) bs=1M count=128
-	mformat -C -h 15 -t 1024 -s 17 -v OS93 -i $(OUTPUT_IMG) ::/
+	parted $(OUTPUT_IMG) --script mklabel msdos
+	parted $(OUTPUT_IMG) --script mkpart primary 0% 100%
+	parted $(OUTPUT_IMG) --script set 1 boot on
+	losetup -P /dev/loop0 $(OUTPUT_IMG)
+	mkfs.msdos /dev/loop0p1
 
-	mcopy -i $(OUTPUT_IMG) $(OUTPUT_KERNEL) ::/
-	mcopy -i $(OUTPUT_IMG) syslinux.cfg ::/
-	mcopy -i $(OUTPUT_IMG) /usr/lib/syslinux/modules/bios/ldlinux.c32 ::/
-	mcopy -i $(OUTPUT_IMG) /usr/lib/syslinux/modules/bios/libcom32.c32 ::/
-	mcopy -i $(OUTPUT_IMG) /usr/lib/syslinux/modules/bios/libutil.c32 ::/
-	mcopy -i $(OUTPUT_IMG) /usr/lib/syslinux/modules/bios/mboot.c32 ::/
+	mkdir -p mnt
+	mount /dev/loop0p1 mnt
+	cp $(OUTPUT_KERNEL) mnt/
+	cp syslinux.cfg mnt/
+	cp /usr/lib/syslinux/modules/bios/ldlinux.c32 mnt/
+	cp /usr/lib/syslinux/modules/bios/libcom32.c32 mnt/
+	cp /usr/lib/syslinux/modules/bios/libutil.c32 mnt/
+	cp /usr/lib/syslinux/modules/bios/mboot.c32 mnt/
+	umount mnt
 
-	syslinux --install $(OUTPUT_IMG)
+	syslinux --install /dev/loop0p1
+
+	losetup -d /dev/loop0
 
 run: all
 	qemu-system-i386 -m 128M -drive file=$(OUTPUT_IMG),format=raw -vga std
