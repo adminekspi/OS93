@@ -12,7 +12,11 @@ In Pardus 23 (Debian-based), those packages should be installed:
 
 After installing these packages and cloning this repository, you can build and run with that command:
 
-    make run
+    sudo make run
+
+After testing, you can clean build artifacts and images:
+
+    sudo make clean
 
 ## Copyright and License
 Copyright (c) 2025 Erdem Ersoy (adminekspi). Licensed with MIT license.
