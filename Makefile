@@ -46,3 +46,4 @@ run: all
 
 clean:
 	rm -rf *.bin *.o *.img mnt/
+	losetup -d /dev/loop0
