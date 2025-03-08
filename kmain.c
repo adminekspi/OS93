@@ -5,14 +5,9 @@
 
 void kmain(void)
 {
-    write_regs(mode_12h_regs);
+    init_vga_12h_mode();
     clear_screen_vga();
-    putpixel(5, 5, 4);
-    putpixel(6, 5, 4);
-    putpixel(7, 5, 4);
-    putpixel(8, 5, 4);
-    putpixel(9, 5, 4);
-    putpixel(10, 5, 4);
+    putpixel(100, 100, 15);
 
     while(1);
 }
