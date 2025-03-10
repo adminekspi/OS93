@@ -4,73 +4,61 @@
 // VGA memory constants
 char * VGA_MODE_PTR = (char *)0xA0000; // VGA mem begins here.
 
-// VGA regs constants
-#define VGA_MODE_CONTROL 0x3C0
-#define VGA_OVERSCAN 0x3C0
-#define VGA_ENABLE_COLOR_PLANE 0x3C0
-#define VGA_HORIZONTAL_PANNING 0x3C0
-#define VGA_COLOR_SELECT 0x3C0
-#define VGA_MISC_OUTPUT 0x3C2
-#define VGA_CLOCK_MODE 0x3C4
-#define VGA_CHAR_SELECT 0x3C4
-#define VGA_MEM_MODE 0x3C4
-#define VGA_MODE 0x3CE
-#define VGA_MISC 0x3CE
-#define VGA_HORIZONTAL_TOTAL 0x3D4
-#define VGA_END_HORIZONTAL_DISPLAY 0x3D4
-#define VGA_START_HORIZONTAL_BLANK 0x3D4
-#define VGA_END_HORIZONTAL_BLANK 0x3D4
-#define VGA_START_HORIZONTAL_RETRACE 0x3D4
-#define VGA_END_HORIZONTAL_RETRACE 0x3D4
-#define VGA_VERTICAL_TOTAL 0x3D4
-#define VGA_OVERFLOW 0x3D4
-#define VGA_PRESET_ROW_SCAN 0x3D4
-#define VGA_MAX_SCAN_LINE 0x3D4
-#define VGA_START_VERTICAL_RETRACE 0x3D4
-#define VGA_END_VERTICAL_RETRACE 0x3D4
-#define VGA_END_ENABLE_DISPLAY 0x3D4
-#define VGA_LOGICAL_WIDTH 0x3D4
-#define VGA_UNDERLINE_LOCATION 0x3D4
-#define VGA_START_VERTICAL_BLANKING 0x3D4
-#define VGA_END_VERTICAL_BLANKING 0x3D4
-#define VGA_MODE_CONTROL_2 0x3D4
+// VGA register constants (from https://files.osdev.org/mirrors/geezer/osd/graphics/modes.c)
+#define VGA_AC_INDEX         0x3C0
+#define VGA_AC_WRITE         0x3C0
+#define VGA_AC_READ          0x3C1
+#define VGA_MISC_WRITE       0x3C2
+#define VGA_SEQ_INDEX        0x3C4
+#define VGA_SEQ_DATA         0x3C5
+#define VGA_DAC_READ_INDEX   0x3C7
+#define VGA_DAC_WRITE_INDEX  0x3C8
+#define VGA_DAC_DATA         0x3C9
+#define VGA_MISC_READ        0x3CC
+#define VGA_GC_INDEX         0x3CE
+#define VGA_GC_DATA          0x3CF
+#define VGA_CRTC_INDEX       0x3D4
+#define VGA_CRTC_DATA        0x3D5
+#define VGA_INSTAT_READ      0x3DA
 
-// Mode 12h Register Values (640x480, 16-color planar mode)
-unsigned char mode_12h_regs[] = {
-    0x01,  // VGA_MODE_CONTROL
-    0x00,  // VGA_OVERSCAN
-    0x0F,  // VGA_ENABLE_COLOR_PLANE
-    0x00,  // VGA_HORIZONTAL_PANNING
-    0x00,  // VGA_COLOR_SELECT
-    0xE3,  // VGA_MISC_OUTPUT
-    0x01,  // VGA_CLOCK_MODE
-    0x00,  // VGA_CHAR_SELECT
-    0x02,  // VGA_MEM_MODE
-    0x00,  // VGA_MODE
-    0x05,  // VGA_MISC
-    0x5F,  // VGA_HORIZONTAL_TOTAL
-    0x4F,  // VGA_END_HORIZONTAL_DISPLAY
-    0x50,  // VGA_START_HORIZONTAL_BLANK
-    0x82,  // VGA_END_HORIZONTAL_BLANK
-    0x54,  // VGA_START_HORIZONTAL_RETRACE
-    0x80,  // VGA_END_HORIZONTAL_RETRACE
-    0x0B,  // VGA_VERTICAL_TOTAL
-    0x3E,  // VGA_OVERFLOW
-    0x00,  // VGA_PRESET_ROW_SCAN
-    0x40,  // VGA_MAX_SCAN_LINE
-    0xEA,  // VGA_START_VERTICAL_RETRACE
-    0x8C,  // VGA_END_VERTICAL_RETRACE
-    0xDF,  // VGA_END_ENABLE_DISPLAY
-    0x28,  // VGA_LOGICAL_WIDTH
-    0x00,  // VGA_UNDERLINE_LOCATION
-    0xE7,  // VGA_START_VERTICAL_BLANKING
-    0x04,  // VGA_END_VERTICAL_BLANKING
-    0xE3   // VGA_MODE_CONTROL_2
+// VGA regsiter values (from https://files.osdev.org/mirrors/geezer/osd/graphics/modes.c)
+unsigned char mode_12h_regs_values[] =
+{
+/* MISC */
+    0xE3,
+/* SEQ */
+    0x03, 0x01, 0x08, 0x00, 0x06,
+/* CRTC */
+    0x5F, 0x4F, 0x50, 0x82, 0x54, 0x80, 0x0B, 0x3E,
+    0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0xEA, 0x0C, 0xDF, 0x28, 0x00, 0xE7, 0x04, 0xE3,
+    0xFF,
+/* GC */
+    0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x05, 0x0F,
+    0xFF,
+/* AC */
+    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x14, 0x07,
+    0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F,
+    0x01, 0x00, 0x0F, 0x00, 0x00
 };
 
+/* 
+    Assumes mode_12h_regs_values layout:
+    [0]           : Miscellaneous Output Register
+    [1-5]         : Sequencer Registers (5 registers)
+    [6-30]        : CRT Controller Registers (25 registers)
+    [31-39]       : Graphics Controller Registers (9 registers)
+    [40-60]       : Attribute Controller Registers (21 registers)
+*/
+#define NUM_MISC  1
+#define NUM_SEQ   5
+#define NUM_CRTC  25
+#define NUM_GC    9
+#define NUM_AC    21
+
 // VGA functions
-void init_vga_12h_mode(void);
-void clear_screen_vga(void);
-void putpixel(int x, int y, unsigned char color);
+void switch_to_vga_12h_mode(unsigned char * regs_values);
+void clear_screen_vga_12h_mode(void);
+void put_pixel_vga_12h_mode(int x, int y, unsigned char color);
 
 #endif // VGA_H
