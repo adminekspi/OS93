@@ -51,7 +51,7 @@ void switch_to_vga_12h_mode(unsigned char * regs_values)
 
 void clear_screen_vga_12h_mode(void)
 {
-    volatile unsigned char *vga = (volatile unsigned char *)VGA_MODE_PTR;
+    volatile unsigned char * vga = (volatile unsigned char *)VGA_MODE_PTR;
     int plane, i;
     int plane_size = 80 * 480; // Each plane: 80 bytes per scanline (640/8) * 480 scanlines
 
@@ -73,7 +73,7 @@ void clear_screen_vga_12h_mode(void)
 
 void put_pixel_vga_12h_mode(int x, int y, unsigned char color)
 {
-    volatile unsigned char *vga = (volatile unsigned char *)VGA_MODE_PTR;
+    volatile unsigned char * vga = (volatile unsigned char *)VGA_MODE_PTR;
     int plane;
     int index = y * 80 + (x >> 3);
     unsigned char bitmask = 0x80 >> (x & 7);
@@ -91,5 +91,51 @@ void put_pixel_vga_12h_mode(int x, int y, unsigned char color)
         else
             current &= ~bitmask;
         vga[index] = current;
+    }
+}
+
+void get_font_vga_12h_mode(void)
+{
+    unsigned int vga_ptr = (unsigned int)VGA_MODE_PTR;
+
+    // Read font data from VGA memory
+    outw(VGA_GC_INDEX, 0x0005);
+    outw(VGA_GC_INDEX, 0x0406);
+    outw(VGA_SEQ_INDEX, 0x0402);
+    outw(VGA_SEQ_INDEX, 0x0604);
+    outd(VGA_SEQ_INDEX, 0x000A0000);
+
+    // Read and copy font data
+    for (int i = 0; i < 256; i++) {
+        for (int j = 0; j < 16; j++)
+        {
+            vga_font[i][j] = inb(vga_ptr);
+            vga_ptr++;
+        }
+
+        // Skip the 16-byte gap between characters
+        for (int j = 0; j < 16; j++)
+        {
+            vga_ptr++;
+        }
+    }
+
+    // Restore default VGA registers
+    outw(VGA_SEQ_INDEX, 0x0302);
+    outw(VGA_SEQ_INDEX, 0x0204);
+    outw(VGA_GC_INDEX, 0x1005);
+    outw(VGA_GC_INDEX, 0x0E06);
+}
+
+void draw_char_vga_12h_mode(unsigned char c, int x, int y, int color_fg, int color_bg)
+{
+    int mask[8] = {1, 2, 4, 8, 16, 32, 64, 128};
+    unsigned char * glyph = (unsigned char *)(vga_font + (short)(c * 16));
+
+    for(int cy=0; cy<16; cy++)
+    {
+        for(int cx = 0; cx < 8; cx++){
+            put_pixel_vga_12h_mode(glyph[cy] & mask[cx] ? color_fg : color_bg , x + cx, y + cy - 12);
+        }
     }
 }
