@@ -2,7 +2,7 @@
 #define VGA_H
 
 // VGA memory constants
-unsigned char * VGA_MODE_PTR = (unsigned char *)0xA0000; // VGA mem begins here.
+volatile unsigned char * VGA_MODE_PTR = (volatile unsigned char *)0xA0000; // VGA mem begins here.
 
 // VGA register constants (from https://files.osdev.org/mirrors/geezer/osd/graphics/modes.c)
 #define VGA_AC_INDEX         0x3C0
@@ -56,8 +56,8 @@ unsigned char mode_12h_regs_values[] =
 #define NUM_GC    9
 #define NUM_AC    21
 
-// VGA font data
-unsigned char vga_font[256][16];
+// VGA font data buffer
+unsigned char vga_font_buffer[256 * 16];
 
 // VGA functions
 void switch_to_vga_12h_mode(unsigned char * regs_values);
