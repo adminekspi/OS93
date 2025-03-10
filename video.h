@@ -2,7 +2,7 @@
 #define VIDEO_H
 
 // Video text mode constants
-unsigned char * VIDEO_TEXT_MODE_PTR = (unsigned char *)0xb8000; // Video mem begins here.
+volatile unsigned char * VIDEO_TEXT_MODE_PTR = (volatile unsigned char *)0xb8000; // Video mem begins here.
 
 // Video text mode functions
 void clear_screen(void);
