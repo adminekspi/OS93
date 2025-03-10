@@ -56,14 +56,9 @@ unsigned char mode_12h_regs_values[] =
 #define NUM_GC    9
 #define NUM_AC    21
 
-// VGA font data buffer
-unsigned char vga_font_buffer[256 * 16];
-
 // VGA functions
 void switch_to_vga_12h_mode(unsigned char * regs_values);
 void clear_screen_vga_12h_mode(void);
 void put_pixel_vga_12h_mode(int x, int y, unsigned char color);
-void get_font_vga_12h_mode(void);
-void draw_char_vga_12h_mode(unsigned char c, int x, int y, int color_fg, int color_bg);
 
 #endif // VGA_H
