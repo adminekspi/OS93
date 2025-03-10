@@ -22,7 +22,7 @@ void switch_to_vga_12h_mode(unsigned char * regs_values)
     outb(VGA_CRTC_DATA, inb(VGA_CRTC_DATA) & ~0x80);
 
     regs_values[0x03] |= 0x80;
-	regs_values[0x11] &= ~0x80;
+    regs_values[0x11] &= ~0x80;
 
     /* Write CRT Controller Registers */
     /* Some registers (like 0x03 and 0x11) might require unlocking. */
