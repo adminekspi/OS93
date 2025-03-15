@@ -24,26 +24,24 @@ all: $(OBJECTS)
 	parted $(OUTPUT_IMG) --script mklabel msdos
 	parted $(OUTPUT_IMG) --script mkpart primary 0% 100%
 	parted $(OUTPUT_IMG) --script set 1 boot on
-	losetup -P /dev/loop0 $(OUTPUT_IMG)
-	mkfs.msdos /dev/loop0p1
 
-	mkdir -p mnt
-	mount /dev/loop0p1 mnt
-	cp $(OUTPUT_KERNEL) mnt/
-	cp syslinux.cfg mnt/
-	cp /usr/lib/syslinux/modules/bios/ldlinux.c32 mnt/
-	cp /usr/lib/syslinux/modules/bios/libcom32.c32 mnt/
-	cp /usr/lib/syslinux/modules/bios/libutil.c32 mnt/
-	cp /usr/lib/syslinux/modules/bios/mboot.c32 mnt/
-	umount mnt
-
-	syslinux --install /dev/loop0p1
-
-	losetup -d /dev/loop0
+	LOOP=$$(losetup -f); \
+	losetup -P $$LOOP $(OUTPUT_IMG); \
+	mkfs.msdos $${LOOP}p1; \
+	mkdir -p mnt; \
+	mount $${LOOP}p1 mnt; \
+	cp $(OUTPUT_KERNEL) mnt/; \
+	cp syslinux.cfg mnt/; \
+	cp /usr/lib/syslinux/modules/bios/ldlinux.c32 mnt/; \
+	cp /usr/lib/syslinux/modules/bios/libcom32.c32 mnt/; \
+	cp /usr/lib/syslinux/modules/bios/libutil.c32 mnt/; \
+	cp /usr/lib/syslinux/modules/bios/mboot.c32 mnt/; \
+	umount mnt; \
+	syslinux --install $${LOOP}p1; \
+	losetup -d $$LOOP
 
 run: all
 	qemu-system-i386 -m 128M -drive file=$(OUTPUT_IMG),format=raw -vga std
 
 clean:
 	rm -rf *.bin *.o *.img mnt/
-	losetup -d /dev/loop0
