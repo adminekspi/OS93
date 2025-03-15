@@ -1,5 +1,5 @@
-#include "vga.h"
 #include "ports.h"
+#include "vga.h"
 
 void switch_to_vga_12h_mode(unsigned char * regs_values)
 {
