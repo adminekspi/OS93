@@ -1,4 +1,3 @@
-#include "math.h"
 #include "ports.h"
 #include "vga.h"
 
@@ -124,51 +123,38 @@ void draw_line_vga_12h_mode(int x0, int y0, int x1, int y1, unsigned char color)
     if (y1 < 0) y1 = 0;
     if (y1 >= VGA_12H_HEIGHT) y1 = VGA_12H_HEIGHT - 1;
 
-    // Draw a line using Bresenham's line algorithm
-
-    int d = 0;
-    int dx = x1 - x0;
-    int dy = y1 - y0;
-    int i0 = 2 * dy;
-    int i1 = 2 * (dy - dx);
-
-    int x = 0;
-    int y = 0;
-    int x_end = 0;
-
-    if (dx < 0)
-    {
-        x = x1;
-        y = y1;
-        x_end = x0;
-    }
-    if (dx > 0)
-    {
-        x = x0;
-        y = y0;
-        x_end = x1;
+    // Eraly exit if the start and end points are the same
+    if (x0 == x1 && y0 == y1) {
+        put_pixel_vga_12h_mode(x0, y0, color);
+        return;
     }
 
-    while(1)
-    {
-        put_pixel_vga_12h_mode(x, y, color);
-
-        if (x >= x_end)
-        {
+    // Bresenham line algorithm for calculating differences
+    int dx = (x1 > x0) ? (x1 - x0) : (x0 - x1);
+    int dy = (y1 > y0) ? (y1 - y0) : (y0 - y1);
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx - dy;
+    int e2;
+    
+    while (1) {
+        put_pixel_vga_12h_mode(x0, y0, color);
+        
+        if (x0 == x1 && y0 == y1) {
             break;
         }
-
-        if (d < 0)
-        {
-            d += i0;
+        
+        e2 = err * 2; // Prevent overflow
+        
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
         }
-        if (d >= 0)
-        {
-            d += i1;
-            y += 1;
+        
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
         }
-
-        x += 1;
     }
 }
 
@@ -182,10 +168,18 @@ void draw_rectangle_vga_12h_mode(int x, int y, int width, int height, unsigned c
     }
 
     // Draw the four lines
-    draw_line_vga_12h_mode(x, y, x + width - 1, y, color);                           // Top
-    draw_line_vga_12h_mode(x, y + height - 1, x + width - 1, y + height - 1, color); // Bottom
-    draw_line_vga_12h_mode(x, y, x, y + height - 1, color);                          // Left
-    draw_line_vga_12h_mode(x + width - 1, y, x + width - 1, y + height - 1, color);  // Right
+
+    // Top horizontal line
+    draw_line_vga_12h_mode(x, y, x + width, y, color);
+    
+    // Bottom horizontal line
+    draw_line_vga_12h_mode(x, y + height, x + width, y + height, color);
+    
+    // Left vertical line
+    draw_line_vga_12h_mode(x, y, x, y + height, color);
+    
+    // Right vertical line
+    draw_line_vga_12h_mode(x + width, y, x + width, y + height, color);
 }
 
 // Draw a filled rectangle
