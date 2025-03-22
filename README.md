@@ -1,7 +1,7 @@
 # OS93
 My second attempt OS from scratch.
 
-Written with the help of ChatGPT and GitHub Copilot.
+Written with the help of Cursor, ChatGPT and GitHub Copilot.
 
 ![OS93 0.0.2 on QEMU](https://raw.githubusercontent.com/adminekspi/OS93/refs/heads/main/media/OS93_0_0_2.png)
 
