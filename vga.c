@@ -5,7 +5,7 @@
 void switch_to_vga_12h_mode(unsigned char * regs_values)
 {
     int index = 0;
-    int i;
+    int i = 0;
 
     // Write miscellaneous output register
     outb(VGA_MISC_WRITE, regs_values[index++]);
@@ -56,7 +56,8 @@ void switch_to_vga_12h_mode(unsigned char * regs_values)
 void clear_screen_vga_12h_mode(void)
 {
     volatile unsigned char * vga = (volatile unsigned char *)VGA_MODE_PTR;
-    int plane, i;
+    int plane = 0;
+    int i = 0;
     int plane_size = 80 * 480; // Each plane: 80 bytes per scanline (640/8) * 480 scanlines
 
     for (plane = 0; plane < 4; plane++)
@@ -79,11 +80,17 @@ void clear_screen_vga_12h_mode(void)
 
 void put_pixel_vga_12h_mode(int x, int y, unsigned char color)
 {
+    // Clip coordinates to VGA boundaries
+    if (x < 0) x = 0;
+    if (x >= VGA_12H_WIDTH) x = VGA_12H_WIDTH - 1;
+    if (y < 0) y = 0;
+    if (y >= VGA_12H_HEIGHT) y = VGA_12H_HEIGHT - 1;
+
     volatile unsigned char * vga = (volatile unsigned char *)VGA_MODE_PTR;
-    int plane;
+    int plane = 0;
     int index = y * 80 + (x >> 3);
     unsigned char bitmask = 0x80 >> (x & 7);
-    unsigned char current;
+    unsigned char current = 0;
 
     for (plane = 0; plane < 4; plane++)
     {
@@ -107,40 +114,61 @@ void put_pixel_vga_12h_mode(int x, int y, unsigned char color)
 
 void draw_line_vga_12h_mode(int x0, int y0, int x1, int y1, unsigned char color)
 {
+    // Clip coordinates to VGA boundaries
+    if (x0 < 0) x0 = 0;
+    if (x0 >= VGA_12H_WIDTH) x0 = VGA_12H_WIDTH - 1;
+    if (y0 < 0) y0 = 0;
+    if (y0 >= VGA_12H_HEIGHT) y0 = VGA_12H_HEIGHT - 1;
+    if (x1 < 0) x1 = 0;
+    if (x1 >= VGA_12H_WIDTH) x1 = VGA_12H_WIDTH - 1;
+    if (y1 < 0) y1 = 0;
+    if (y1 >= VGA_12H_HEIGHT) y1 = VGA_12H_HEIGHT - 1;
+
     // Draw a line using Bresenham's line algorithm
 
-    int dx = abs(x1 - x0);
-    int dy = abs(y1 - y0);
-    int sx = (x0 < x1) ? 1 : -1;
-    int sy = (y0 < y1) ? 1 : -1;
-    int err = dx - dy;
-    int e2 = 0;
+    int d = 0;
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    int i0 = 2 * dy;
+    int i1 = 2 * (dy - dx);
 
-    while (1)
+    int x = 0;
+    int y = 0;
+    int x_end = 0;
+
+    if (dx < 0)
     {
-        if (x0 >= 0 && x0 < VGA_12H_WIDTH && y0 >= 0 && y0 < VGA_12H_HEIGHT)
-        {
-            put_pixel_vga_12h_mode(x0, y0, color);
-        }
+        x = x1;
+        y = y1;
+        x_end = x0;
+    }
+    if (dx > 0)
+    {
+        x = x0;
+        y = y0;
+        x_end = x1;
+    }
 
-        if (x0 == x1 && y0 == y1)
+    while(1)
+    {
+        put_pixel_vga_12h_mode(x, y, color);
+
+        if (x >= x_end)
         {
             break;
         }
 
-        e2 = 2 * err;
-        
-        if (e2 > -dy)
+        if (d < 0)
         {
-            err = err - dy;
-            x0 = x0 + sx;
+            d += i0;
+        }
+        if (d >= 0)
+        {
+            d += i1;
+            y += 1;
         }
 
-        if (e2 < dx)
-        {
-            err = err + dx;
-            y0 = y0 + sy;
-        }
+        x += 1;
     }
 }
 
