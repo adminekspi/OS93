@@ -10,13 +10,13 @@ void kmain(void)
     clear_screen_vga_12h_mode();
 
     put_pixel_vga_12h_mode(5, 5, 0x0F);
-    draw_line_vga_12h_mode(10, 10, 50, 50, 0x0F);
+    draw_line_vga_12h_mode(10, 10, 50, 50, 0x01);
 
-    draw_circle_vga_12h_mode(100, 100, 50, 0x0F);
-    draw_rectangle_vga_12h_mode(200, 200, 50, 50, 0x0F);
+    draw_circle_vga_12h_mode(100, 100, 50, 0x02);
+    draw_rectangle_vga_12h_mode(200, 200, 50, 50, 0x03);
 
-    draw_filled_circle_vga_12h_mode(300, 300, 50, 0x0F);
-    draw_filled_rectangle_vga_12h_mode(100, 300, 50, 50, 0x0F);
+    draw_filled_circle_vga_12h_mode(300, 300, 50, 0x04);
+    draw_filled_rectangle_vga_12h_mode(100, 300, 50, 50, 0x05);
 
     while(1);
 }

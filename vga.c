@@ -86,29 +86,51 @@ void put_pixel_vga_12h_mode(int x, int y, unsigned char color)
     if (y >= VGA_12H_HEIGHT) y = VGA_12H_HEIGHT - 1;
 
     volatile unsigned char * vga = (volatile unsigned char *)VGA_MODE_PTR;
-    int plane = 0;
-    int index = y * 80 + (x >> 3);
-    unsigned char bitmask = 0x80 >> (x & 7);
-    unsigned char current = 0;
+    int offset = y * 80 + (x >> 3);
+    unsigned char bit_mask = 0x80 >> (x & 7);
 
-    for (plane = 0; plane < 4; plane++)
-    {
-        // Select the current plane (bit in map mask)
-        outb(VGA_SEQ_INDEX, 2);
-        outb(VGA_SEQ_DATA, 1 << plane);
-
-        // Read current byte and update the specific bit for this plane
-        current = vga[index];
-        if ((color >> plane) & 1)
-        {
-            current |= bitmask;
-        }
-        else
-        {
-            current &= ~bitmask;
-        }
-        vga[index] = current;
-    }
+    // Set Read Mode 0
+    outb(VGA_GC_INDEX, 0x05);
+    outb(VGA_GC_DATA, 0x00);
+    
+    // Set the Bit Mask Register to affect only this pixel
+    outb(VGA_GC_INDEX, 0x08);
+    outb(VGA_GC_DATA, bit_mask);
+    
+    // Enable all planes for writing
+    outb(VGA_SEQ_INDEX, 0x02);
+    outb(VGA_SEQ_DATA, 0x0F);
+    
+    // Set Data Rotate Register to copy mode (no rotation, no logical operation)
+    outb(VGA_GC_INDEX, 0x03);
+    outb(VGA_GC_DATA, 0x00);
+    
+    // Set Write Mode 0
+    outb(VGA_GC_INDEX, 0x05);
+    outb(VGA_GC_DATA, 0x00);
+    
+    // Set all planes to write the value 0
+    outb(VGA_GC_INDEX, 0x00);
+    outb(VGA_GC_DATA, 0x00);
+    outb(VGA_GC_INDEX, 0x01);
+    outb(VGA_GC_DATA, 0x00);
+    outb(VGA_GC_INDEX, 0x02);
+    outb(VGA_GC_DATA, 0x00);
+    outb(VGA_GC_INDEX, 0x03);
+    outb(VGA_GC_DATA, 0x00);
+    
+    // Use Map Mask Register to select which planes to write
+    outb(VGA_SEQ_INDEX, 0x02);
+    outb(VGA_SEQ_DATA, color & 0x0F);
+    
+    // Write to the pixel (using latch mechanism)
+    vga[offset] |= 0xFF;
+    
+    // Reset settings
+    outb(VGA_SEQ_INDEX, 0x02);
+    outb(VGA_SEQ_DATA, 0x0F);
+    outb(VGA_GC_INDEX, 0x08);
+    outb(VGA_GC_DATA, 0xFF);
 }
 
 void draw_line_vga_12h_mode(int x0, int y0, int x1, int y1, unsigned char color)
@@ -168,24 +190,25 @@ void draw_rectangle_vga_12h_mode(int x, int y, int width, int height, unsigned c
     }
 
     // Draw the four lines
+    int x2 = x + width - 1;
+    int y2 = y + height - 1;
 
     // Top horizontal line
-    draw_line_vga_12h_mode(x, y, x + width, y, color);
+    draw_line_vga_12h_mode(x, y, x2, y, color);
     
     // Bottom horizontal line
-    draw_line_vga_12h_mode(x, y + height, x + width, y + height, color);
+    draw_line_vga_12h_mode(x, y2, x2, y2, color);
     
     // Left vertical line
-    draw_line_vga_12h_mode(x, y, x, y + height, color);
+    draw_line_vga_12h_mode(x, y, x, y2, color);
     
     // Right vertical line
-    draw_line_vga_12h_mode(x + width, y, x + width, y + height, color);
+    draw_line_vga_12h_mode(x2, y, x2, y2, color);
 }
 
 // Draw a filled rectangle
 void draw_filled_rectangle_vga_12h_mode(int x, int y, int width, int height, unsigned char color)
 {
-    int i = 0;
     int j = 0;
 
     // Check bounds
@@ -194,12 +217,10 @@ void draw_filled_rectangle_vga_12h_mode(int x, int y, int width, int height, uns
         return;
     }
 
+    // Draw the rectangle line by line (horizontal scanlines) for efficiency
     for (j = y; j < y + height; j++)
     {
-        for (i = x; i < x + width; i++)
-        {
-            put_pixel_vga_12h_mode(i, j, color);
-        }
+        draw_line_vga_12h_mode(x, j, x + width - 1, j, color);
     }
 }
 
@@ -272,15 +293,45 @@ void draw_filled_circle_vga_12h_mode(int x0, int y0, int radius, unsigned char c
     int x = radius;
     int y = 0;
     int err = 0;
+    int x1, x2;
 
     while (x >= y)
     {
-        // Draw horizontal lines between octants for filling
-        draw_line_vga_12h_mode(x0 - x, y0 + y, x0 + x, y0 + y, color);
-        draw_line_vga_12h_mode(x0 - y, y0 + x, x0 + y, y0 + x, color);
-        draw_line_vga_12h_mode(x0 - x, y0 - y, x0 + x, y0 - y, color);
-        draw_line_vga_12h_mode(x0 - y, y0 - x, x0 + y, y0 - x, color);
+        // For each horizontal scan line within the circle, draw a line
+        
+        // Y0 + Y level
+        x1 = x0 - x;
+        x2 = x0 + x;
+        if (y0 + y >= 0 && y0 + y < VGA_12H_HEIGHT) {
+            if (x1 < 0) x1 = 0;
+            if (x2 >= VGA_12H_WIDTH) x2 = VGA_12H_WIDTH - 1;
+            draw_line_vga_12h_mode(x1, y0 + y, x2, y0 + y, color);
+        }
+        
+        // Y0 - Y level
+        if (y0 - y >= 0 && y0 - y < VGA_12H_HEIGHT) {
+            if (x1 < 0) x1 = 0;
+            if (x2 >= VGA_12H_WIDTH) x2 = VGA_12H_WIDTH - 1;
+            draw_line_vga_12h_mode(x1, y0 - y, x2, y0 - y, color);
+        }
+        
+        // Y0 + X level
+        x1 = x0 - y;
+        x2 = x0 + y;
+        if (y0 + x >= 0 && y0 + x < VGA_12H_HEIGHT) {
+            if (x1 < 0) x1 = 0;
+            if (x2 >= VGA_12H_WIDTH) x2 = VGA_12H_WIDTH - 1;
+            draw_line_vga_12h_mode(x1, y0 + x, x2, y0 + x, color);
+        }
+        
+        // Y0 - X level
+        if (y0 - x >= 0 && y0 - x < VGA_12H_HEIGHT) {
+            if (x1 < 0) x1 = 0;
+            if (x2 >= VGA_12H_WIDTH) x2 = VGA_12H_WIDTH - 1;
+            draw_line_vga_12h_mode(x1, y0 - x, x2, y0 - x, color);
+        }
 
+        // Update circle parameters
         if (err <= 0)
         {
             y += 1;
