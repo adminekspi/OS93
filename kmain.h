@@ -3,7 +3,7 @@
 
 #include "drvutils/stdint.h"
 
-// Other definitions
-int8_t * KMAIN_HELLO_MSG = (int8_t *)"Hello from kmain!";
+// Kernel error definitions
+int8_t * KMAIN_VIDEO_ERROR_MSG = (int8_t *)"Error: Video type not supported!";
 
 #endif // KMAIN_H

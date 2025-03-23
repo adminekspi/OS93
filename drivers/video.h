@@ -32,12 +32,16 @@ enum video_type
     VIDEO_TYPE_MONOCHROME = 0x30,
 };
 
+// Video type pointer
+volatile const uint16_t * VIDEO_TYPE_PTR = (const uint16_t *)0x410;
+
 // Video text mode functions
 void clear_screen(void);
 void print_char(int8_t c, uint32_t x, uint32_t y, uint8_t color);
 void print_string(int8_t * str, uint32_t x, uint32_t y, uint8_t color);
 
 // Video type functions
-// To be added later
+uint16_t detect_video_type(void);
+enum video_type get_video_type(void);
 
 #endif // VIDEO_H

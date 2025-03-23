@@ -39,3 +39,13 @@ void print_string(int8_t * str, uint32_t x, uint32_t y, uint8_t color)
         index = index + 2;
     }
 }
+
+uint16_t detect_video_type(void)
+{
+    return * VIDEO_TYPE_PTR;
+}
+
+enum video_type get_video_type(void)
+{
+    return (enum video_type)(detect_video_type() & 0x30); 
+}
