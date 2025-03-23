@@ -1,7 +1,7 @@
+#include "drivers/ports.h"
+#include "drivers/vga.h"
+#include "drivers/video.h"
 #include "kmain.h"
-#include "ports.h"
-#include "vga.h"
-#include "video.h"
 
 void kmain(void)
 {
