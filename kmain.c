@@ -22,10 +22,6 @@ void kmain(void)
         draw_filled_circle_vga_12h_mode(300, 300, 50, 0x04);
         draw_filled_rectangle_vga_12h_mode(100, 300, 50, 50, 0x05);
     }
-    else
-    {
-        print_string(KMAIN_VIDEO_ERROR_MSG, 0, 0, VGA_WHITE);
-    }
 
     while(1);
 }
