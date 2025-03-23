@@ -1,10 +1,10 @@
 #include "ports.h"
 #include "vga.h"
 
-void switch_to_vga_12h_mode(unsigned char * regs_values)
+void switch_to_vga_12h_mode(uint8_t * regs_values)
 {
-    int index = 0;
-    int i = 0;
+    int32_t index = 0;
+    int32_t i = 0;
 
     // Write miscellaneous output register
     outb(VGA_MISC_WRITE, regs_values[index++]);
@@ -54,10 +54,10 @@ void switch_to_vga_12h_mode(unsigned char * regs_values)
 
 void clear_screen_vga_12h_mode(void)
 {
-    volatile unsigned char * vga = (volatile unsigned char *)VGA_MODE_PTR;
-    int plane = 0;
-    int i = 0;
-    int plane_size = 80 * 480; // Each plane: 80 bytes per scanline (640/8) * 480 scanlines
+    volatile uint8_t * vga = (volatile uint8_t *)VGA_MODE_PTR;
+    int32_t plane = 0;
+    int32_t i = 0;
+    int32_t plane_size = 80 * 480; // Each plane: 80 bytes per scanline (640/8) * 480 scanlines
 
     for (plane = 0; plane < 4; plane++)
     {
@@ -77,7 +77,7 @@ void clear_screen_vga_12h_mode(void)
     outb(VGA_SEQ_DATA, 0x0F);
 }
 
-void put_pixel_vga_12h_mode(int x, int y, unsigned char color)
+void put_pixel_vga_12h_mode(int32_t x, int32_t y, uint8_t color)
 {
     // Clip coordinates to VGA boundaries
     if (x < 0) x = 0;
@@ -85,9 +85,9 @@ void put_pixel_vga_12h_mode(int x, int y, unsigned char color)
     if (y < 0) y = 0;
     if (y >= VGA_12H_HEIGHT) y = VGA_12H_HEIGHT - 1;
 
-    volatile unsigned char * vga = (volatile unsigned char *)VGA_MODE_PTR;
-    int offset = y * 80 + (x >> 3);
-    unsigned char bit_mask = 0x80 >> (x & 7);
+    volatile uint8_t * vga = (volatile uint8_t *)VGA_MODE_PTR;
+    int32_t offset = y * 80 + (x >> 3);
+    uint8_t bit_mask = 0x80 >> (x & 7);
 
     // Set Read Mode 0
     outb(VGA_GC_INDEX, 0x05);
@@ -133,7 +133,7 @@ void put_pixel_vga_12h_mode(int x, int y, unsigned char color)
     outb(VGA_GC_DATA, 0xFF);
 }
 
-void draw_line_vga_12h_mode(int x0, int y0, int x1, int y1, unsigned char color)
+void draw_line_vga_12h_mode(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t color)
 {
     // Clip coordinates to VGA boundaries
     if (x0 < 0) x0 = 0;
@@ -181,7 +181,7 @@ void draw_line_vga_12h_mode(int x0, int y0, int x1, int y1, unsigned char color)
 }
 
 // Draw a rectangle outline
-void draw_rectangle_vga_12h_mode(int x, int y, int width, int height, unsigned char color)
+void draw_rectangle_vga_12h_mode(int32_t x, int32_t y, int32_t width, int32_t height, uint8_t color)
 {
     // Check bounds
     if (x < 0 || y < 0 || x + width > VGA_12H_WIDTH || y + height > VGA_12H_HEIGHT)
@@ -207,9 +207,9 @@ void draw_rectangle_vga_12h_mode(int x, int y, int width, int height, unsigned c
 }
 
 // Draw a filled rectangle
-void draw_filled_rectangle_vga_12h_mode(int x, int y, int width, int height, unsigned char color)
+void draw_filled_rectangle_vga_12h_mode(int32_t x, int32_t y, int32_t width, int32_t height, uint8_t color)
 {
-    int j = 0;
+    int32_t j = 0;
 
     // Check bounds
     if (x < 0 || y < 0 || x + width > VGA_12H_WIDTH || y + height > VGA_12H_HEIGHT)
@@ -225,11 +225,11 @@ void draw_filled_rectangle_vga_12h_mode(int x, int y, int width, int height, uns
 }
 
 // Draw a circle using the midpoint circle algorithm
-void draw_circle_vga_12h_mode(int x0, int y0, int radius, unsigned char color)
+void draw_circle_vga_12h_mode(int32_t x0, int32_t y0, int32_t radius, uint8_t color)
 {
-    int x = radius;
-    int y = 0;
-    int err = 0;
+    int32_t x = radius;
+    int32_t y = 0;
+    int32_t err = 0;
 
     while (x >= y)
     {
@@ -288,12 +288,12 @@ void draw_circle_vga_12h_mode(int x0, int y0, int radius, unsigned char color)
 }
 
 // Draw a filled circle using the midpoint circle algorithm
-void draw_filled_circle_vga_12h_mode(int x0, int y0, int radius, unsigned char color)
+void draw_filled_circle_vga_12h_mode(int32_t x0, int32_t y0, int32_t radius, uint8_t color)
 {
-    int x = radius;
-    int y = 0;
-    int err = 0;
-    int x1, x2;
+    int32_t x = radius;
+    int32_t y = 0;
+    int32_t err = 0;
+    int32_t x1, x2;
 
     while (x >= y)
     {
@@ -355,14 +355,14 @@ void wait_vsync(void)
     while (!(inb(VGA_INSTAT_READ) & 8));
 }
 
-void sleep(unsigned int ms)
+void sleep(uint32_t ms)
 {
     // Very simple busy-wait based delay
     // This is not accurate and depends on CPU speed
     // For a kernel, a better approach would be to use timer interrupts
 
-    unsigned int i = 0;
-    unsigned int j = 0;
+    uint32_t i = 0;
+    uint32_t j = 0;
 
     for (i = 0; i < ms; i++)
     {

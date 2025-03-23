@@ -1,8 +1,10 @@
 #ifndef VGA_H
 #define VGA_H
 
+#include "../drvutils/stdint.h"
+
 // VGA memory constants
-volatile unsigned char * VGA_MODE_PTR = (volatile unsigned char *)0xA0000; // VGA mem begins here.
+volatile uint8_t * VGA_MODE_PTR = (volatile uint8_t *)0xA0000; // VGA mem begins here.
 
 // VGA register constants (from https://files.osdev.org/mirrors/geezer/osd/graphics/modes.c)
 #define VGA_AC_INDEX         0x3C0
@@ -22,7 +24,7 @@ volatile unsigned char * VGA_MODE_PTR = (volatile unsigned char *)0xA0000; // VG
 #define VGA_INSTAT_READ      0x3DA
 
 // VGA regsiter values (from https://files.osdev.org/mirrors/geezer/osd/graphics/modes.c)
-unsigned char mode_12h_regs_values[] =
+uint8_t mode_12h_regs_values[] =
 {
 /* MISC */
     0xE3,
@@ -58,21 +60,21 @@ unsigned char mode_12h_regs_values[] =
 
 // VGA functions
 
-void switch_to_vga_12h_mode(unsigned char * regs_values);
+void switch_to_vga_12h_mode(uint8_t * regs_values);
 void clear_screen_vga_12h_mode(void);
 
-void put_pixel_vga_12h_mode(int x, int y, unsigned char color);
+void put_pixel_vga_12h_mode(int x, int y, uint8_t color);
 
-void draw_line_vga_12h_mode(int x0, int y0, int x1, int y1, unsigned char color);
+void draw_line_vga_12h_mode(int x0, int y0, int x1, int y1, uint8_t color);
 
-void draw_rectangle_vga_12h_mode(int x, int y, int width, int height, unsigned char color);
-void draw_filled_rectangle_vga_12h_mode(int x, int y, int width, int height, unsigned char color);
+void draw_rectangle_vga_12h_mode(int x, int y, int width, int height, uint8_t color);
+void draw_filled_rectangle_vga_12h_mode(int x, int y, int width, int height, uint8_t color);
 
-void draw_circle_vga_12h_mode(int x0, int y0, int radius, unsigned char color);
-void draw_filled_circle_vga_12h_mode(int x0, int y0, int radius, unsigned char color);
+void draw_circle_vga_12h_mode(int x0, int y0, int radius, uint8_t color);
+void draw_filled_circle_vga_12h_mode(int x0, int y0, int radius, uint8_t color);
 
 void wait_vsync(void);
-void sleep(unsigned int ms);
+void sleep(uint32_t ms);
 
 // VGA 12h mode constants
 #define VGA_12H_WIDTH 640

@@ -2,7 +2,7 @@
 
 void clear_screen(void)
 {
-    unsigned int i = 0;
+    uint32_t i = 0;
 
     // this loop clears the screen
     while(i < 80 * 25 * 2)
@@ -13,17 +13,17 @@ void clear_screen(void)
     }
 }
 
-void print_char(char c, unsigned int x, unsigned int y, unsigned char color)
+void print_char(int8_t c, uint32_t x, uint32_t y, uint8_t color)
 {
-    unsigned int index = (80 * y + x) * 2;
+    uint32_t index = (80 * y + x) * 2;
     VIDEO_TEXT_MODE_PTR[index] = c;
     VIDEO_TEXT_MODE_PTR[index + 1] = color;
 }
 
-void print_string(char * str, unsigned int x, unsigned int y, unsigned char color)
+void print_string(int8_t * str, uint32_t x, uint32_t y, uint8_t color)
 {
-    unsigned int i = 0;
-    unsigned int index = (80 * y + x) * 2;
+    uint32_t i = 0;
+    uint32_t index = (80 * y + x) * 2;
 
     if (str == 0 || x > 80 || y > 25)
     {

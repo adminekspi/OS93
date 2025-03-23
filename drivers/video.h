@@ -1,8 +1,10 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include "../drvutils/stdint.h"
+
 // Video text mode constants
-volatile unsigned char * VIDEO_TEXT_MODE_PTR = (volatile unsigned char *)0xb8000; // Video mem begins here.
+volatile uint8_t * VIDEO_TEXT_MODE_PTR = (volatile uint8_t *)0xb8000; // Video mem begins here.
 
 // Video text mode colors
 #define TEXT_BLACK           0x00
@@ -32,8 +34,8 @@ enum video_type
 
 // Video text mode functions
 void clear_screen(void);
-void print_char(char c, unsigned int x, unsigned int y, unsigned char color);
-void print_string(char * str, unsigned int x, unsigned int y, unsigned char color);
+void print_char(int8_t c, uint32_t x, uint32_t y, uint8_t color);
+void print_string(int8_t * str, uint32_t x, uint32_t y, uint8_t color);
 
 // Video type functions
 // To be added later

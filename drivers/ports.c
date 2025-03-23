@@ -1,37 +1,37 @@
 #include "ports.h"
 
-unsigned char inb(unsigned short port)
+uint8_t inb(uint16_t port)
 {
-    unsigned char result;
+    uint8_t result;
     __asm__ volatile ("inb %1, %0" : "=a"(result) : "Nd"(port));
     return result;
 }
 
-unsigned short inw(unsigned short port)
+uint16_t inw(uint16_t port)
 {
-    unsigned short result;
+    uint16_t result;
     __asm__ volatile ("inw %1, %0" : "=a"(result) : "Nd"(port));
     return result;
 }
 
-unsigned int ind(unsigned short port)
+uint32_t ind(uint16_t port)
 {
-    unsigned int result;
+    uint32_t result;
     __asm__ volatile ("inl %1, %0" : "=a"(result) : "Nd"(port));
     return result;
 }
 
-void outb(unsigned short port, unsigned char value)
+void outb(uint16_t port, uint8_t value)
 {
     __asm__ volatile ("outb %0, %1" : : "a" (value), "Nd" (port));
 }
 
-void outw(unsigned short port, unsigned short value)
+void outw(uint16_t port, uint16_t value)
 {
     __asm__ volatile ("outw %0, %1" : : "a" (value), "Nd" (port));
 }
 
-void outd(unsigned short port, unsigned int value)
+void outd(uint16_t port, uint32_t value)
 {
     __asm__ volatile ("outl %0, %1" : : "a" (value), "Nd" (port));
 }

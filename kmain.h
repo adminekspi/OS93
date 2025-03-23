@@ -1,7 +1,9 @@
 #ifndef KMAIN_H
 #define KMAIN_H
 
+#include "drvutils/stdint.h"
+
 // Other definitions
-char * KMAIN_HELLO_MSG = "Hello from kmain!";
+int8_t * KMAIN_HELLO_MSG = (int8_t *)"Hello from kmain!";
 
 #endif // KMAIN_H
