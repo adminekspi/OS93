@@ -4,7 +4,7 @@
 // Video text mode constants
 volatile unsigned char * VIDEO_TEXT_MODE_PTR = (volatile unsigned char *)0xb8000; // Video mem begins here.
 
-// Text colors
+// Video text mode colors
 #define TEXT_BLACK           0x00
 #define TEXT_BLUE            0x01
 #define TEXT_GREEN           0x02
@@ -22,9 +22,20 @@ volatile unsigned char * VIDEO_TEXT_MODE_PTR = (volatile unsigned char *)0xb8000
 #define TEXT_YELLOW          0x0E
 #define TEXT_WHITE           0x0F
 
+// Video type constants
+enum video_type
+{
+    VIDEO_TYPE_NONE = 0x00,
+    VIDEO_TYPE_COLOR = 0x20,
+    VIDEO_TYPE_MONOCHROME = 0x30,
+};
+
 // Video text mode functions
 void clear_screen(void);
 void print_char(char c, unsigned int x, unsigned int y, unsigned char color);
 void print_string(char * str, unsigned int x, unsigned int y, unsigned char color);
+
+// Video type functions
+// To be added later
 
 #endif // VIDEO_H
