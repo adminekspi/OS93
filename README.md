@@ -22,3 +22,6 @@ After testing, you can clean build artifacts and images:
 Copyright (c) 2025 Erdem Ersoy (adminekspi). Licensed with MIT license.
 
 See COPYING for full license text.
+
+## Thanks
+[mintsuki:](https://github.com/mintsuki) drivers/utils things
