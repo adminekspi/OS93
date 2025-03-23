@@ -1,5 +1,5 @@
-HEADERS = $(wildcard drivers/*.h libc/*.h kmain.h)
-SOURCES = $(wildcard drivers/*.c libc/*.c kmain.c)
+HEADERS = $(wildcard drivers/*.h drvutils/*.h kmain.h)
+SOURCES = $(wildcard drivers/*.c drvutils/*.c kmain.c)
 
 OUTPUT_KERNEL = kernel.bin
 OUTPUT_IMG = os93.img
