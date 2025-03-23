@@ -49,4 +49,4 @@ run: all
 	qemu-system-i386 -m 128M -drive file=$(OUTPUT_IMG),format=raw -vga std
 
 clean:
-	rm -rf *.bin *.o *.img mnt/
+	rm -rf $(OUTPUT_KERNEL) $(OUTPUT_IMG) $(OBJECTS) $(OBJECT_KERNEL) mnt/
