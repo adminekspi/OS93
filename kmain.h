@@ -3,9 +3,7 @@
 
 #include "drvutils/stdint.h"
 
-#define MAX_BUFFER_SIZE          512
-static uint8_t file_buffer[MAX_BUFFER_SIZE];
-
-static bool create_hello_world_file(fat_fs_t * fs);
+// Kernel error definitions
+int8_t * KMAIN_VIDEO_ERROR_MSG = (int8_t *)"Error: Video type not supported!";
 
 #endif // KMAIN_H

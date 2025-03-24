@@ -39,9 +39,6 @@ all: $(OBJECTS)
 	cp /usr/lib/syslinux/modules/bios/libcom32.c32 mnt/
 	cp /usr/lib/syslinux/modules/bios/libutil.c32 mnt/
 	cp /usr/lib/syslinux/modules/bios/mboot.c32 mnt/
-	
-	echo "HELLO!" > mnt/HELLO.TXT
-	
 	umount mnt
 
 	syslinux --install $(LOOP)p1;
